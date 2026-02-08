@@ -6,11 +6,38 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
+using Npgsql;
 
 namespace Lava_Car
 {
     public class Funcoes
     {
+        public static void GarantirBancoDados()
+        {
+            const string databaseName = "postgres";
+            const string adminConnectionString = "Server=localhost;Database=postgres;User Id=postgres;Password=123;";
+
+            using (var connection = new NpgsqlConnection(adminConnectionString))
+            {
+                connection.Open();
+                using (var command = new NpgsqlCommand(
+                    "SELECT 1 FROM pg_database WHERE datname = @dbName", connection))
+                {
+                    command.Parameters.AddWithValue("@dbName", databaseName);
+                    var exists = command.ExecuteScalar();
+
+                    if (exists == null)
+                    {
+                        using (var createCommand = new NpgsqlCommand(
+                            "CREATE DATABASE \"" + databaseName + "\"", connection))
+                        {
+                            createCommand.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+        }
+
         public static void GerarPlanilhaExcel(DataGridView DGV, string NomePlanilha)
         {
             Excel.Application excelApp = new Excel.Application();

@@ -135,7 +135,9 @@
             "Lavagem Completa",
             "Lavagem Premium",
             "Lavagem Simples",
-            "Polimento Automotivo"});
+            "Polimento Automotivo",
+            "Outros Serviços",
+            "Lavagem Moto"});
             this.comboBox2.Location = new System.Drawing.Point(76, 52);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(417, 23);

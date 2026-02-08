@@ -17,9 +17,11 @@ namespace Lava_Car.Cadastros.Pedidos.Classes
         public DateTime Data { get; set; }
         public DateTime Data_Alteracao { get; set; }
         public decimal Valor { get; set; }
+        public string Avarias { get; set; }
         public string Observacao { get; set; }
         public string Forma_Pagamento { get; set; }
         public string Situacao { get; set; }
         public bool Excluido { get; set; }
+        public bool PossuiImagem { get; set; }
     }
 }

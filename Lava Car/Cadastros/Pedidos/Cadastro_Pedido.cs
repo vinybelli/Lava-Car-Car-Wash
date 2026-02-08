@@ -33,6 +33,8 @@ namespace Lava_Car.Cadastros.Pedidos
         {
             InitializeComponent();
 
+            GarantirTabelaPedidos();
+
             AtualizarClientes();
 
             EditarPedido = editarPedido;
@@ -44,12 +46,14 @@ namespace Lava_Car.Cadastros.Pedidos
             if (EditarPedido)
             {
                 button7.Visible = true;
+                button8.Enabled = true;
 
                 BuscarDadosPedido();
             }
             else
             {
                 button7.Visible = false;
+                button8.Enabled = false;
             }
 
             if (CadastrarAgendamento)
@@ -112,16 +116,25 @@ namespace Lava_Car.Cadastros.Pedidos
                 return;
             }
 
-            DialogResult confirmacao = MessageBox.Show("Deseja inserir este Pedido?", "Confirmação", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            if (confirmacao == DialogResult.No)
+            if (!EditarPedido)
             {
-                return;
+                //DialogResult confirmacao = MessageBox.Show("Deseja inserir este Pedido?", "Confirmação", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                //if (confirmacao == DialogResult.No)
+                //{
+                //    return;
+                //}
+
+                SalvarPedidoBD();
+
+                MessageBox.Show("Pedido inserido com sucesso!", "Informação", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+            else
+            {
+                SalvarPedidoBD();
 
-            SalvarPedidoBD();
-
-            MessageBox.Show("Pedido inserido com sucesso!", "Informação", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Pedido salvo com sucesso!", "Informação", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
 
             this.Close();
         }
@@ -143,6 +156,7 @@ namespace Lava_Car.Cadastros.Pedidos
                         "Servico = @servico, " +
                         "Data_Alteracao = @dataAlteracao, " +
                         "Valor = CAST(@valor AS NUMERIC), " +
+                        "Avarias = @avarias, " +
                         "Observacao = @observacao, " +
                         "Forma_Pagamento = @formaPagamento, " +
                         "Situacao = @situacao " +
@@ -163,6 +177,7 @@ namespace Lava_Car.Cadastros.Pedidos
                         command.Parameters.AddWithValue("@servico", comboBox2.Text);
                         command.Parameters.AddWithValue("@dataAlteracao", DateTime.Now);
                         command.Parameters.AddWithValue("@valor", textBox3.Text.Replace(",", "."));
+                        command.Parameters.AddWithValue("@avarias", textBox2.Text);
                         command.Parameters.AddWithValue("@observacao", textBox1.Text);
                         command.Parameters.AddWithValue("@formaPagamento", comboBox4.Text);
                         command.Parameters.AddWithValue("@situacao", comboBox3.Text);
@@ -177,8 +192,8 @@ namespace Lava_Car.Cadastros.Pedidos
                 {
                     connection.Open();
                     using (var command = new NpgsqlCommand(
-                        "INSERT INTO Pedidos (Cliente, Id_Cliente, Veiculo, Placa, Servico, Data, Data_Alteracao, Valor, Observacao, Forma_Pagamento, Situacao) " +
-                        "VALUES (@cliente, @idCliente, @veiculo, @placa, @servico, @data, @dataAlteracao, CAST(@valor AS NUMERIC), @observacao, @formaPagamento, @situacao)", connection))
+                        "INSERT INTO Pedidos (Cliente, Id_Cliente, Veiculo, Placa, Servico, Data, Data_Alteracao, Valor, Avarias, Observacao, Forma_Pagamento, Situacao) " +
+                        "VALUES (@cliente, @idCliente, @veiculo, @placa, @servico, @data, @dataAlteracao, CAST(@valor AS NUMERIC), @avarias, @observacao, @formaPagamento, @situacao)", connection))
                     {
                         command.Parameters.AddWithValue("@cliente", comboBox1.Text);
                         command.Parameters.AddWithValue("@idCliente", Clientes[comboBox1.SelectedIndex].Id);
@@ -188,6 +203,7 @@ namespace Lava_Car.Cadastros.Pedidos
                         command.Parameters.AddWithValue("@data", DateTime.Now);
                         command.Parameters.AddWithValue("@dataAlteracao", DateTime.Now);
                         command.Parameters.AddWithValue("@valor", textBox3.Text.Replace(",","."));
+                        command.Parameters.AddWithValue("@avarias", textBox2.Text);
                         command.Parameters.AddWithValue("@observacao", textBox1.Text);
                         command.Parameters.AddWithValue("@formaPagamento", comboBox4.Text);
                         command.Parameters.AddWithValue("@situacao", comboBox3.Text);
@@ -290,6 +306,7 @@ namespace Lava_Car.Cadastros.Pedidos
             textBox6.Text = Pedido.Veiculo;
             maskedTextBox1.Text = Pedido.Placa;
             textBox3.Text = Pedido.Valor.ToString();
+            textBox2.Text = Pedido.Avarias;
             textBox1.Text = Pedido.Observacao;
 
             for (int i = 0; i < comboBox4.Items.Count; i++)
@@ -338,6 +355,7 @@ namespace Lava_Car.Cadastros.Pedidos
                             int colunaServico = dr.GetOrdinal("Servico");
                             int colunaData = dr.GetOrdinal("Data");
                             int colunaValor = dr.GetOrdinal("Valor");
+                            int colunaAvarias = dr.GetOrdinal("Avarias");
                             int colunaFormaPag = dr.GetOrdinal("Forma_Pagamento");
                             int colunaSituacao = dr.GetOrdinal("Situacao");
                             int colunaObservacao = dr.GetOrdinal("Observacao");
@@ -352,6 +370,7 @@ namespace Lava_Car.Cadastros.Pedidos
                                 Pedido.Servico = dr.GetString(colunaServico);
                                 Pedido.Data = dr.GetDateTime(colunaData);
                                 Pedido.Valor = dr.GetDecimal(colunaValor);
+                                Pedido.Avarias = dr.IsDBNull(colunaAvarias) ? string.Empty : dr.GetString(colunaAvarias);
                                 Pedido.Forma_Pagamento = dr.GetString(colunaFormaPag);
                                 Pedido.Situacao = dr.GetString(colunaSituacao);
                                 Pedido.Observacao = dr.GetString(colunaObservacao);
@@ -387,6 +406,7 @@ namespace Lava_Car.Cadastros.Pedidos
 
             textBox1.Text = Agenda.Observacao;
             textBox6.Text = Agenda.Veiculo;
+            textBox2.Text = string.Empty;
         }
 
         public void BuscarDadosAgendaBD()
@@ -436,6 +456,26 @@ namespace Lava_Car.Cadastros.Pedidos
             DeletarPedido();
         }
 
+        private void button8_Click(object sender, EventArgs e)
+        {
+            if (!EditarPedido || string.IsNullOrWhiteSpace(Id))
+            {
+                MessageBox.Show("Salve o pedido antes de anexar imagens.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (!int.TryParse(Id, out var pedidoId))
+            {
+                MessageBox.Show("Não foi possível identificar o pedido selecionado.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using (var anexos = new Anexos_Pedido(pedidoId))
+            {
+                anexos.ShowDialog();
+            }
+        }
+
         private void DeletarPedido()
         {
             DialogResult confirmacao = MessageBox.Show("Deseja realmente Excluir este Pedido?", "Confirmação", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -462,6 +502,43 @@ namespace Lava_Car.Cadastros.Pedidos
                     "UPDATE Pedidos " +
                     "SET Excluido = 'true', Data_Alteracao = '" + DateTime.Now + "' " +
                     "WHERE Id = '" + Id + "'", connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void GarantirTabelaPedidos()
+        {
+            string connectionString = "Server=localhost;Database=postgres;User Id=postgres;Password=123;";
+
+            using (var connection = new NpgsqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new NpgsqlCommand(
+                    "CREATE TABLE IF NOT EXISTS Pedidos (" +
+                    "Id SERIAL PRIMARY KEY, " +
+                    "Cliente TEXT NOT NULL, " +
+                    "Id_Cliente INTEGER NOT NULL, " +
+                    "Veiculo TEXT, " +
+                    "Placa TEXT, " +
+                    "Servico TEXT, " +
+                    "Data TIMESTAMP NOT NULL DEFAULT NOW(), " +
+                    "Data_Alteracao TIMESTAMP NOT NULL DEFAULT NOW(), " +
+                    "Valor NUMERIC(12,2) NOT NULL DEFAULT 0, " +
+                    "Avarias TEXT, " +
+                    "Observacao TEXT, " +
+                    "Forma_Pagamento TEXT, " +
+                    "Situacao TEXT, " +
+                    "Excluido BOOLEAN NOT NULL DEFAULT FALSE" +
+                    ")", connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+
+                using (var command = new NpgsqlCommand(
+                    "ALTER TABLE Pedidos " +
+                    "ADD COLUMN IF NOT EXISTS Avarias TEXT", connection))
                 {
                     command.ExecuteNonQuery();
                 }

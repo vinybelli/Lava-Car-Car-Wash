@@ -18,6 +18,8 @@ namespace Lava_Car.Cadastros.Clientes
         {
             InitializeComponent();
 
+            GarantirTabelaClientes();
+
             comboBox7.SelectedIndex = 0;
 
             EditarCliente = editarCliente;
@@ -220,6 +222,32 @@ namespace Lava_Car.Cadastros.Clientes
                 label6.Text = "Telefone";
                 label6.Location = new System.Drawing.Point(33, 131);
                 maskedTextBox3.Mask = "(00) 0000-0000";
+            }
+        }
+
+        private void GarantirTabelaClientes()
+        {
+            string connectionString = "Server=localhost;Database=postgres;User Id=postgres;Password=123;";
+
+            using (var connection = new NpgsqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new NpgsqlCommand(
+                    "CREATE TABLE IF NOT EXISTS Clientes (" +
+                    "Id SERIAL PRIMARY KEY, " +
+                    "Nome_Razao TEXT NOT NULL, " +
+                    "Nome_Fantasia TEXT, " +
+                    "CPF_CNPJ TEXT, " +
+                    "Telefone TEXT, " +
+                    "Inscricao_Estadual TEXT, " +
+                    "Tipo_Cliente TEXT, " +
+                    "Data TIMESTAMP NOT NULL DEFAULT NOW(), " +
+                    "Data_Alteracao TIMESTAMP NOT NULL DEFAULT NOW(), " +
+                    "Excluido BOOLEAN NOT NULL DEFAULT FALSE" +
+                    ")", connection))
+                {
+                    command.ExecuteNonQuery();
+                }
             }
         }
 

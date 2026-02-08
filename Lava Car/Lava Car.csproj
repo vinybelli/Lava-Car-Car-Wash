@@ -170,6 +170,12 @@
     <Compile Include="Cadastros\Pedidos\Cadastro_Pedido.Designer.cs">
       <DependentUpon>Cadastro_Pedido.cs</DependentUpon>
     </Compile>
+    <Compile Include="Cadastros\Pedidos\Anexos_Pedido.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Cadastros\Pedidos\Anexos_Pedido.Designer.cs">
+      <DependentUpon>Anexos_Pedido.cs</DependentUpon>
+    </Compile>
     <Compile Include="Cadastros\Pedidos\Classes\Classe_Pedidos.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

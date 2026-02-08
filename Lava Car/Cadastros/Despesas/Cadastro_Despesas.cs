@@ -23,6 +23,8 @@ namespace Lava_Car.Cadastros.Despesas
         {
             InitializeComponent();
 
+            GarantirTabelaDespesas();
+
             dateTimePicker1.Value = DateTime.Now;
 
             EditarDespesa = editarDespesa;
@@ -135,6 +137,29 @@ namespace Lava_Car.Cadastros.Despesas
                         command.Parameters.AddWithValue("@dataAlteracao", DateTime.Now);
                         command.ExecuteNonQuery();
                     }
+                }
+            }
+        }
+
+        private void GarantirTabelaDespesas()
+        {
+            string connectionString = "Server=localhost;Database=postgres;User Id=postgres;Password=123;";
+
+            using (var connection = new NpgsqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new NpgsqlCommand(
+                    "CREATE TABLE IF NOT EXISTS Despesas (" +
+                    "Id SERIAL PRIMARY KEY, " +
+                    "Despesa TEXT NOT NULL, " +
+                    "Valor NUMERIC(12,2) NOT NULL DEFAULT 0, " +
+                    "Observacao TEXT, " +
+                    "Data DATE NOT NULL, " +
+                    "Data_Alteracao TIMESTAMP NOT NULL DEFAULT NOW(), " +
+                    "Excluido BOOLEAN NOT NULL DEFAULT FALSE" +
+                    ")", connection))
+                {
+                    command.ExecuteNonQuery();
                 }
             }
         }

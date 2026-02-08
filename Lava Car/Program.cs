@@ -14,6 +14,7 @@ namespace Lava_Car
         [STAThread]
         static void Main()
         {
+            Funcoes.GarantirBancoDados();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Sistema_Lava_Car());

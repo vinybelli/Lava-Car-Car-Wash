@@ -30,16 +30,7 @@ namespace Lava_Car.Cadastros.Licitacoes
                 dateTimePicker2.Value = DateTime.Today;
 
             
-                dataGridView5.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                dataGridView5.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                dataGridView5.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                dataGridView5.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                dataGridView5.Columns[4].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                dataGridView5.Columns[5].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                dataGridView5.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                dataGridView5.Columns[7].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                dataGridView5.Columns[8].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                dataGridView5.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                BeginInvoke(new Action(ConfigureGridColumns));
            
 
                 AtualizarPedidos();
@@ -49,6 +40,40 @@ namespace Lava_Car.Cadastros.Licitacoes
             catch
             {
 
+            }
+        }
+
+        private void ConfigureGridColumns()
+        {
+            if (dataGridView5 == null || dataGridView5.Columns.Count == 0)
+            {
+                return;
+            }
+
+            dataGridView5.SuspendLayout();
+
+            try
+            {
+                dataGridView5.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+
+                dataGridView5.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                dataGridView5.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                dataGridView5.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                dataGridView5.Columns[4].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                dataGridView5.Columns[5].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                dataGridView5.Columns[6].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                dataGridView5.Columns[7].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                dataGridView5.Columns[8].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                dataGridView5.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+
+                dataGridView5.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            }
+            catch
+            {
+            }
+            finally
+            {
+                dataGridView5.ResumeLayout();
             }
         }
 

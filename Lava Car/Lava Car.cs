@@ -42,6 +42,7 @@ namespace Lava_Car
                     dataGridView5.Columns[7].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                     dataGridView5.Columns[8].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                     dataGridView5.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                    dataGridView5.Columns[10].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
 
                     dataGridView1.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                     dataGridView1.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
@@ -54,6 +55,8 @@ namespace Lava_Car
                 {
                     
                 }
+
+                checkBox1.Checked = true;
 
                 comboBox1.SelectedIndex = 0;
 
@@ -114,6 +117,8 @@ namespace Lava_Car
             for(int i = 0; i < Pedidos.Count; i++)
             {
                 string nomeCliente = BuscarNomeCliente(Pedidos[i].Id_Cliente);
+                bool possuiAvarias = !string.IsNullOrWhiteSpace(Pedidos[i].Avarias) || Pedidos[i].PossuiImagem;
+                string avariasTexto = possuiAvarias ? "Sim" : "Não";
 
                 if(nomeCliente != "")
                 {
@@ -121,11 +126,12 @@ namespace Lava_Car
                     nomeCliente,
                     Pedidos[i].Servico,
                     Pedidos[i].Veiculo,
+                    Pedidos[i].Placa,
+                    avariasTexto,
                     Pedidos[i].Valor,
                     Pedidos[i].Forma_Pagamento,
                     Pedidos[i].Situacao,
                     Pedidos[i].Observacao,
-                    Pedidos[i].Placa,
                     Pedidos[i].Id);
 
                     totalPedidos += Pedidos[i].Valor;
@@ -138,11 +144,12 @@ namespace Lava_Car
                     Pedidos[i].Cliente + " (Cliente Excluído)",
                     Pedidos[i].Servico,
                     Pedidos[i].Veiculo,
+                    Pedidos[i].Placa,
+                    avariasTexto,
                     Pedidos[i].Valor,
                     Pedidos[i].Forma_Pagamento,
                     Pedidos[i].Situacao,
                     Pedidos[i].Observacao,
-                    Pedidos[i].Placa,
                     Pedidos[i].Id);
 
                     totalPedidos += Pedidos[i].Valor;
@@ -194,8 +201,11 @@ namespace Lava_Car
                 }
 
                 using (var command = new NpgsqlCommand("" +
-                    "SELECT * " +
+                    "SELECT Pedidos.*, " +
+                    "CASE WHEN Imagens.Id_Pedido IS NULL THEN FALSE ELSE TRUE END AS Possui_Imagem " +
                     "FROM Pedidos " +
+                    "LEFT JOIN (SELECT DISTINCT Id_Pedido FROM Pedidos_Imagens WHERE Excluido = FALSE) Imagens " +
+                    "ON Imagens.Id_Pedido = Pedidos.Id " +
                     "WHERE Excluido = 'false' and Data >= '" + dateTimePicker1.Value.ToString("yyyy-MM-dd 00:00:00") + "' AND Data <= '" + dateTimePicker2.Value.ToString("yyyy-MM-dd 23:59:59") + "'" + pago + cliente + "" +
                     "ORDER BY Id ASC", connection))
                 {
@@ -208,12 +218,14 @@ namespace Lava_Car
                             int colunaIdCliente = dr.GetOrdinal("Id_Cliente");
                             int colunaVeiculo = dr.GetOrdinal("Veiculo");
                             int colunaPlaca = dr.GetOrdinal("Placa");
+                            int colunaAvarias = dr.GetOrdinal("Avarias");
                             int colunaServico = dr.GetOrdinal("Servico");
                             int colunaData = dr.GetOrdinal("Data");
                             int colunaValor = dr.GetOrdinal("Valor");
                             int colunaFormaPag = dr.GetOrdinal("Forma_Pagamento");
                             int colunaSituacao = dr.GetOrdinal("Situacao");
                             int colunaObservacao = dr.GetOrdinal("Observacao");
+                            int colunaPossuiImagem = dr.GetOrdinal("Possui_Imagem");
 
                             while (dr.Read())
                             {
@@ -224,12 +236,14 @@ namespace Lava_Car
                                 pedido.Id_Cliente = dr.GetInt32(colunaIdCliente);
                                 pedido.Veiculo = dr.GetString(colunaVeiculo);
                                 pedido.Placa = dr.GetString(colunaPlaca);
+                                pedido.Avarias = dr.GetString(colunaAvarias);
                                 pedido.Servico = dr.GetString(colunaServico);
                                 pedido.Data = dr.GetDateTime(colunaData);
                                 pedido.Valor = dr.GetDecimal(colunaValor);
                                 pedido.Forma_Pagamento = dr.GetString(colunaFormaPag);
                                 pedido.Situacao = dr.GetString(colunaSituacao);
                                 pedido.Observacao = dr.GetString(colunaObservacao);
+                                pedido.PossuiImagem = dr.GetBoolean(colunaPossuiImagem);
 
                                 Pedidos.Add(pedido);
                             }
@@ -388,7 +402,7 @@ namespace Lava_Car
         {
             int linha = dataGridView5.SelectedCells[0].RowIndex;
 
-            Cadastro_Pedido cadastroPedido = new Cadastro_Pedido(true, dataGridView5.Rows[linha].Cells[9].Value.ToString(), false);
+            Cadastro_Pedido cadastroPedido = new Cadastro_Pedido(true, dataGridView5.Rows[linha].Cells["dataGridViewTextBoxColumn16"].Value.ToString(), false);
 
             cadastroPedido.ShowDialog();
 
@@ -398,8 +412,18 @@ namespace Lava_Car
         private void dataGridView5_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             int linha = e.RowIndex;
+            if (linha < 0 || linha >= dataGridView5.Rows.Count)
+            {
+                return;
+            }
 
-            Cadastro_Pedido cadastroPedido = new Cadastro_Pedido(true, dataGridView5.Rows[linha].Cells[9].Value.ToString(), false);
+            var row = dataGridView5.Rows[linha];
+            if (row.IsNewRow || row.Cells["dataGridViewTextBoxColumn16"].Value == null)
+            {
+                return;
+            }
+
+            Cadastro_Pedido cadastroPedido = new Cadastro_Pedido(true, row.Cells["dataGridViewTextBoxColumn16"].Value.ToString(), false);
 
             cadastroPedido.ShowDialog();
 
@@ -420,8 +444,18 @@ namespace Lava_Car
         private void dataGridView1_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             int linha = e.RowIndex;
+            if (linha < 0 || linha >= dataGridView1.Rows.Count)
+            {
+                return;
+            }
 
-            Cadastro_Agenda cadastroAgendamento = new Cadastro_Agenda(true, dataGridView1.Rows[linha].Cells[0].Value.ToString());
+            var row = dataGridView1.Rows[linha];
+            if (row.IsNewRow || row.Cells[0].Value == null)
+            {
+                return;
+            }
+
+            Cadastro_Agenda cadastroAgendamento = new Cadastro_Agenda(true, row.Cells[0].Value.ToString());
 
             cadastroAgendamento.ShowDialog();
 
@@ -563,6 +597,18 @@ namespace Lava_Car
             }
             catch (Exception ex)
             {
+            }
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if(checkBox1.Checked == true)
+            {
+                dataGridView5.Columns["Column5"].Visible = true;
+            }
+            else
+            {
+                dataGridView5.Columns["Column5"].Visible = false;
             }
         }
     }

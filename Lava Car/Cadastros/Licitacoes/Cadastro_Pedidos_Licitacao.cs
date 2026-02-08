@@ -33,6 +33,8 @@ namespace Lava_Car.Cadastros.Licitacoes
         {
             InitializeComponent();
 
+            GarantirTabelaPedidosLicitacao();
+
             AtualizarClientesPj();
 
             EditarPedidoLicitacao = editarPedidoLicitacao;
@@ -179,6 +181,35 @@ namespace Lava_Car.Cadastros.Licitacoes
             if (e.KeyChar == 27)
             {
                 this.Close();
+            }
+        }
+
+        private void GarantirTabelaPedidosLicitacao()
+        {
+            string connectionString = "Server=localhost;Database=postgres;User Id=postgres;Password=123;";
+
+            using (var connection = new NpgsqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new NpgsqlCommand(
+                    "CREATE TABLE IF NOT EXISTS Pedidos_Licitacao (" +
+                    "Id SERIAL PRIMARY KEY, " +
+                    "Cliente TEXT NOT NULL, " +
+                    "Id_Cliente INTEGER NOT NULL, " +
+                    "Veiculo TEXT, " +
+                    "Placa TEXT, " +
+                    "Servico TEXT, " +
+                    "Data TIMESTAMP NOT NULL DEFAULT NOW(), " +
+                    "Data_Alteracao TIMESTAMP NOT NULL DEFAULT NOW(), " +
+                    "Valor NUMERIC(12,2) NOT NULL DEFAULT 0, " +
+                    "Observacao TEXT, " +
+                    "Forma_Pagamento TEXT, " +
+                    "Situacao TEXT, " +
+                    "Excluido BOOLEAN NOT NULL DEFAULT FALSE" +
+                    ")", connection))
+                {
+                    command.ExecuteNonQuery();
+                }
             }
         }
 

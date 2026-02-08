@@ -121,9 +121,24 @@ namespace Lava_Car.Cadastros.Clientes
 
         private void button4_Click(object sender, EventArgs e)
         {
-            int linha = dataGridView5.SelectedCells[0].RowIndex;
+            if (dataGridView5.SelectedCells.Count == 0)
+            {
+                return;
+            }
 
-            Cadastro_Cliente cadastroPedidosLicitacao = new Cadastro_Cliente(true, dataGridView5.Rows[linha].Cells[0].Value.ToString());
+            int linha = dataGridView5.SelectedCells[0].RowIndex;
+            if (linha < 0 || linha >= dataGridView5.Rows.Count)
+            {
+                return;
+            }
+
+            var row = dataGridView5.Rows[linha];
+            if (row.IsNewRow || row.Cells[0].Value == null)
+            {
+                return;
+            }
+
+            Cadastro_Cliente cadastroPedidosLicitacao = new Cadastro_Cliente(true, row.Cells[0].Value.ToString());
 
             cadastroPedidosLicitacao.ShowDialog();
 
@@ -133,8 +148,18 @@ namespace Lava_Car.Cadastros.Clientes
         private void dataGridView5_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             int linha = e.RowIndex;
+            if (linha < 0 || linha >= dataGridView5.Rows.Count)
+            {
+                return;
+            }
 
-            Cadastro_Cliente cadastroPedidosLicitacao = new Cadastro_Cliente(true, dataGridView5.Rows[linha].Cells[0].Value.ToString());
+            var row = dataGridView5.Rows[linha];
+            if (row.IsNewRow || row.Cells[0].Value == null)
+            {
+                return;
+            }
+
+            Cadastro_Cliente cadastroPedidosLicitacao = new Cadastro_Cliente(true, row.Cells[0].Value.ToString());
 
             cadastroPedidosLicitacao.ShowDialog();
 

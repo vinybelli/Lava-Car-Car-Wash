@@ -28,6 +28,8 @@ namespace Lava_Car.Cadastros.Agenda
         {
             InitializeComponent();
 
+            GarantirTabelaAgendamento();
+
             AtualizarClientes();
 
             EditarAgenda = editarAgenda;
@@ -191,6 +193,31 @@ namespace Lava_Car.Cadastros.Agenda
             Cadastro_Cliente clientes = new Cadastro_Cliente(false, "");
 
             clientes.ShowDialog();
+        }
+
+        private void GarantirTabelaAgendamento()
+        {
+            string connectionString = "Server=localhost;Database=postgres;User Id=postgres;Password=123;";
+
+            using (var connection = new NpgsqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new NpgsqlCommand(
+                    "CREATE TABLE IF NOT EXISTS Agendamento (" +
+                    "Id SERIAL PRIMARY KEY, " +
+                    "Data DATE NOT NULL, " +
+                    "Horario TIME NOT NULL, " +
+                    "Cliente TEXT NOT NULL, " +
+                    "Id_Cliente INTEGER NOT NULL, " +
+                    "Servico TEXT, " +
+                    "Veiculo TEXT, " +
+                    "Observacao TEXT, " +
+                    "Excluido BOOLEAN NOT NULL DEFAULT FALSE" +
+                    ")", connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
         }
 
         public void BuscarAgendamento()
